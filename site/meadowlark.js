@@ -1,5 +1,6 @@
 const express = require('express')
 const engine = require('express-handlebars')
+const fortune = require('./lib/fortune')
 const app = express()
 
 app.engine('handlebars', engine.engine())
@@ -13,12 +14,7 @@ app.use(express.static(__dirname + '/public'))
 app.get('/', (req, res) => res.render('home'))
 
 app.get('/about', (req, res) => {
-  const fortunes = [
-    '姚俊敏',
-    '魏贵东',
-    '王金玉'
-  ]
-  res.render('about', {fortune: fortunes[Math.floor(Math.random() * fortunes.length)]})
+  res.render('about', {fortune: fortune.getFortune()})
 })
 
 // 定制404页
