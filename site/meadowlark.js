@@ -3,6 +3,7 @@ const engine = require('express-handlebars')
 const fortune = require('./lib/fortune')
 const app = express()
 
+// app.disable('x-powered-by')
 app.engine('handlebars', engine.engine())
 app.set('view engine', 'handlebars')
 app.set('views', './views')
@@ -15,6 +16,12 @@ app.get('/', (req, res) => res.render('home'))
 
 app.get('/about', (req, res) => {
   res.render('about', {fortune: fortune.getFortune()})
+})
+
+app.get('/header', (req, res) => {
+  res.type('text/plain')
+  const header = Object.entries(req.headers).map(([key, value]) => `${key}: ${value}`)
+  res.send(header.join('\n'))
 })
 
 // 定制404页
