@@ -32,10 +32,13 @@ app.get('/header', (req, res) => {
   res.send(header.join('\n'))
 })
 
-/**表单 */
+/**表单 浏览器 */
 app.get('/newsletter-signup', handlers.newsletterSignup)
 app.post('/newsletter-signup/process', handlers.newsletterSignupProcess)
 app.get('/newsletter-signup/thank-you', handlers.newsletterSignupThankYou)
+/**表单 fetch */
+app.get('/newsletter', handlers.newsletter)
+app.post('/api/newsletter-signup', handlers.api.newsletterSignup)
 
 // 定制404页
 app.use((req, res) => {
