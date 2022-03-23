@@ -23,5 +23,36 @@ exports.api = {
     console.log('name (from visible form field):' + req.body.name)
     console.log('email (from visible form field):' + req.body.email)
     res.send({result: 'success'})
+  },
+  vacationPhotoContest: (req, res, fields, files) => {
+    console.log('field data:', fields)
+    console.log('files:', files)
+    res.send({result: 'sucess'})
   }
+}
+
+exports.vacationPhotoContest = (req, res) => {
+  res.render('./contest/vacation-photo', {
+    csrf: 'csrf token goes here',
+    year: '2022',
+    month: '3'
+  })
+}
+
+exports.vacationPhotoContestProcess = (req, res, fields, files) => {
+  console.log('field data:', fields)
+  console.log('files:', files)
+  res.redirect(303, '/contest/vacation-photo-thank-you')
+}
+
+exports.vacationPhotoContestThankYou = (req, res) => {
+  res.render('./contest/vacation-photo-thank-you')
+}
+
+exports.vacation = (req, res) => {
+  res.render('./contest/vacation', {
+    csrf: 'csrf token goes here',
+    year: '2022',
+    month: '3'
+  })
 }
