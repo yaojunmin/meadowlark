@@ -4,6 +4,8 @@ const fortune = require('./lib/fortune')
 const handlers = require('./lib/handlers')
 const bodyParser = require('body-parser')
 const multiparty = require('multiparty')
+const multer = require('multer') // 建议采用
+const upload = multer({dest: 'uploads/'})
 
 const app = express()
 
@@ -53,12 +55,17 @@ app.post('/contest/vacation-photo/:year/:month', (req, res) => {
 app.get('/contest/vacation-photo-thank-you', handlers.vacationPhotoContestThankYou)
 /**文件上传 fetch*/
 app.get('/contest/vacation', handlers.vacation)
-app.post('/api/vacation-photo-contest/:year/:month', (req, res) => {
-  const form = new multiparty.Form()
-  form.parse(req, (err, fields, files) => {
-    if (err) return res.status(500).send({ error: err.message })
-    handlers.api.vacationPhotoContest(req, res, fields, files)
-  })
+// app.post('/api/vacation-photo-contest/:year/:month', (req, res) => {
+//   const form = new multiparty.Form()
+//   form.parse(req, (err, fields, files) => {
+//     if (err) return res.status(500).send({ error: err.message })
+//     handlers.api.vacationPhotoContest(req, res, fields, files)
+//   })
+// })
+app.post('/api/vacation-photo-contest/:year/:month', upload.single('photo'), (req, res) => {
+  const fields = req.body
+  const files = req.file
+  handlers.api.vacationPhotoContest(req, res, fields, files)
 })
 
 
