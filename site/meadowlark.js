@@ -6,6 +6,10 @@ const bodyParser = require('body-parser')
 const multiparty = require('multiparty')
 const multer = require('multer') // 建议采用
 const upload = multer({dest: 'uploads/'})
+const cookieParser = require('cookie-parser')
+const { credentials } = require('./config')
+const expressSession = require('express-session')
+const flashMiddleware = require('./lib/middleware/flash')
 
 const app = express()
 
@@ -23,7 +27,23 @@ app.use(bodyParser.urlencoded({ extended: false }))
 // parse application/json
 app.use(bodyParser.json())
 
-app.get('/', (req, res) => res.render('home'))
+app.use(cookieParser(credentials.cookieSecret))
+app.use(expressSession({
+  resave: false,//是否强制保存session信息
+  saveUninitialized: false,//是否保存未初始化的session
+  secret: credentials.cookieSecret,//对session id进行签名
+}))
+app.use(flashMiddleware)
+
+app.get('/', (req, res) => {
+  console.log('monster', req.cookies.monster)
+  console.log('signedMonster', req.signedCookies.signed_monster)
+  res.cookie('monster', 'nom nom', {
+    httpOnly: true
+  })
+  res.cookie('signed_monster', 'nom nom', { signed: true })
+  res.render('home')
+})
 
 app.get('/about', (req, res) => {
   res.render('about', {fortune: fortune.getFortune()})

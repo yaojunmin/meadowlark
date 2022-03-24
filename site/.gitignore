@@ -4,4 +4,9 @@ node_modules
 #mac系统
 .DS_Store
 
-#uploads
+#文件上传目录
+uploads
+
+#配置信息
+.credentials.*
+
