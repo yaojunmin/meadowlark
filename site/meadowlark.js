@@ -97,7 +97,7 @@ app.use((req, res) => {
 })
 
 // 定制500页
-app.use((err, req, next) => {
+app.use((err, req, next) => { // ??? req res next err
   console.error(err.message)
   res.status(500)
   res.render('500')
