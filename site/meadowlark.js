@@ -10,6 +10,7 @@ const cookieParser = require('cookie-parser')
 const { credentials } = require('./config')
 const expressSession = require('express-session')
 const flashMiddleware = require('./lib/middleware/flash')
+const emailService = require('./lib/email')(credentials)
 
 const app = express()
 
@@ -86,6 +87,46 @@ app.post('/api/vacation-photo-contest/:year/:month', upload.single('photo'), (re
   const fields = req.body
   const files = req.file
   handlers.api.vacationPhotoContest(req, res, fields, files)
+})
+
+// 邮件
+app.post('/cart/checkout', (req, res, next) => {
+  // const cart = req.session.cart
+  // if(!cart) next(new Error('cart does not exist.'))
+  // const name = req.body.name || '',
+  //       email = req.body.email || ''
+  // if (!email.match(VALID_EMAIL_REGEX)) return res.next(new Error('invalid email address.'))
+  // cart.number = Math.random().toString().replace(/^0\.0*/, '')
+  // cart.billing = {
+  //   name,
+  //   email,
+  // }
+  // render 使用回调 即不会发送到浏览器
+  const cart = {
+    number: 9999,
+    billing: {
+      name: req.body.name,
+      email: req.body.email,
+    },
+  }
+  res.render('email/cart-thank-you', { layout: null, cart }, (err, html) => {
+    console.log('rendered email:', html)
+    if(err) console.log('error in email template')
+    emailService.send(
+      // cart.billing.email,
+      req.body.email,
+      '我是主题',
+      html,
+      __dirname + '/public/img/email/email.png'
+    )
+    .then(info => {
+      console.log('send!', info)
+      res.render('cart-thank-you', { cart })
+    })
+    .catch(err => {
+      console.error('unable to send confirmation: ' + err.message)
+    })
+  })
 })
 
 
