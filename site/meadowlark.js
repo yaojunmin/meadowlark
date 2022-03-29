@@ -11,6 +11,8 @@ const { credentials } = require('./config')
 const expressSession = require('express-session')
 const flashMiddleware = require('./lib/middleware/flash')
 const emailService = require('./lib/email')(credentials)
+const morgan = require('morgan')
+const fs = require('fs')
 
 const app = express()
 
@@ -20,6 +22,18 @@ app.set('view engine', 'handlebars')
 app.set('views', './views')
 
 const port = process.env.PORT || 3000
+
+// 日志
+switch(app.get('env')) {
+  case 'development':
+    app.use(morgan('dev'))
+    break;
+  case 'production':
+    // a 追加
+    const stream = fs.createWriteStream(__dirname + '/access.log', { flags: 'a'})
+    app.use(morgan('combined', { stream }))
+    break;
+}
 
 app.use(express.static(__dirname + '/public'))
 
@@ -145,5 +159,7 @@ app.use((err, req, next) => { // ??? req res next err
 })
 
 app.listen(port, () => console.log(`
-express started on http://localhost:${port};press ctrl-c to terminate.
+express started on ${app.get('env')} mode at 
+http://localhost:${port};
+press ctrl-c to terminate.
 `))

@@ -34,3 +34,8 @@ express的官方文档也包含一个中间件列表
   提供静态文件服务的支持。
 - vhost
   虚拟主机（vhost），使子域名管理更加容易。
+
+## 命令行
+常用命令
+1. export PORT=2000 NODE_ENV=production && node meadowlark.js
+2. export PORT=2000 NODE_ENV=development  && node meadowlark.js

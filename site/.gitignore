@@ -10,3 +10,6 @@ uploads
 #配置信息
 .credentials.*
 
+#日志
+access.log
+
