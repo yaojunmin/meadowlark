@@ -34,8 +34,31 @@ express的官方文档也包含一个中间件列表
   提供静态文件服务的支持。
 - vhost
   虚拟主机（vhost），使子域名管理更加容易。
+- cross-env
+  跨平台运行设置和使用环境变量
 
-## 命令行
-常用命令
-1. export PORT=2000 NODE_ENV=production && node meadowlark.js
-2. export PORT=2000 NODE_ENV=development  && node meadowlark.js
+## 生产环境问题
+### 进程管理
+1. forever：直接易用
+2. pm2：支持更多特性
+
+### 网站扩展
+- 垂直扩展
+- 水平扩展：持久化、应用集群
+### 集群
+1. 不太理解
+2. 压力测试
+
+### 异常处理
+1. 捕获异常处理
+2. 未捕获异常处理：优雅关闭、故障转移（集群）、sentry
+
+### 代理服务器
+1. 开发环境 轻量级代理 node-http-proxy
+2. 生产环境 Nginx
+
+### 网站监控
+- uptimerobot 第三方在线监控
+
+### 压力测试
+- artillery

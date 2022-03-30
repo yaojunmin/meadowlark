@@ -13,6 +13,7 @@ const flashMiddleware = require('./lib/middleware/flash')
 const emailService = require('./lib/email')(credentials)
 const morgan = require('morgan')
 const fs = require('fs')
+const cluster = require('cluster')
 
 const app = express()
 
@@ -50,6 +51,14 @@ app.use(expressSession({
 }))
 app.use(flashMiddleware)
 
+// 不同worker处理不同请求日志
+app.use((req, res, next) => {
+  if(cluster.isWorker) {
+    console.log(`worker ${cluster.worker.id} received request`)
+  }
+  next()
+})
+
 app.get('/', (req, res) => {
   console.log('monster', req.cookies.monster)
   console.log('signedMonster', req.signedCookies.signed_monster)
@@ -58,6 +67,11 @@ app.get('/', (req, res) => {
   })
   res.cookie('signed_monster', 'nom nom', { signed: true })
   res.render('home')
+})
+
+// 测试异常
+app.get('/fail', (req, res) => {
+  throw new Error('nope')
 })
 
 app.get('/about', (req, res) => {
@@ -152,14 +166,35 @@ app.use((req, res) => {
 })
 
 // 定制500页
-app.use((err, req, next) => { // ??? req res next err
+// express能够捕获的异常
+app.use((err, req, res, next) => {
   console.error(err.message)
-  res.status(500)
-  res.render('500')
+  // 亦可通知提醒错误
+  res.status(500).render('500')
 })
 
-app.listen(port, () => console.log(`
-express started on ${app.get('env')} mode at 
-http://localhost:${port};
-press ctrl-c to terminate.
-`))
+// 未捕获异常
+// 会覆盖默认行为
+// sentry记录错误 日后修复异常
+process.on('uncaughtException', err => {
+  console.error('uncaught exception\n', err.stack)
+  // 执行清理工作，例如关闭数据库链接
+  process.exit(1)
+})
+
+
+
+function startServer(port) {
+  app.listen(port, () => console.log(`
+  express started on ${app.get('env')} mode at 
+  http://localhost:${port};
+  press ctrl-c to terminate.
+  `))
+}
+// 判断是否直接运行
+if (require.main === module) {
+  startServer(process.env.PORT || 3000)
+} else {
+  // require导入为一个模块
+  module.exports = startServer
+}
