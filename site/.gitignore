@@ -6,6 +6,7 @@ node_modules
 
 #文件上传目录
 uploads
+data
 
 #配置信息
 .credentials.*
