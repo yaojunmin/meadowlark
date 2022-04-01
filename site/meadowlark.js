@@ -8,13 +8,15 @@ const multer = require('multer') // 建议采用
 const upload = multer({dest: 'uploads/'})
 const cookieParser = require('cookie-parser')
 const { credentials } = require('./config')
+const redis = require('redis')
 const expressSession = require('express-session')
+const RedisStore = require('connect-redis')(expressSession)
 const flashMiddleware = require('./lib/middleware/flash')
 const emailService = require('./lib/email')(credentials)
 const morgan = require('morgan')
 const fs = require('fs')
 const cluster = require('cluster')
-const db = require('./db')
+const db = require('./db')//创建数据库链接
 
 const app = express()
 
@@ -45,10 +47,22 @@ app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 
 app.use(cookieParser(credentials.cookieSecret))
+
+// redis@v4
+// 创建Redis连接
+const redisCache = redis.createClient({
+  url: credentials.redis.url,
+  legacyMode: true,//保持兼容性
+});
+redisCache.connect().catch(console.error)
 app.use(expressSession({
   resave: false,//是否强制保存session信息
   saveUninitialized: false,//是否保存未初始化的session
   secret: credentials.cookieSecret,//对session id进行签名
+  store: new RedisStore({
+    client: redisCache,
+    logErrors: true,
+  })
 }))
 app.use(flashMiddleware)
 
@@ -163,6 +177,7 @@ app.get('/vacations', handlers.listVacations)
 app.get('/notify-me-when-in-season', handlers.notifyWhenInSeasonForm)
 app.post('/notify-me-when-in-season', handlers.notifyWhenInSeasonProcess)
 
+app.get('/set-currency/:currency', handlers.setCurrency)
 
 // 定制404页
 app.use((req, res) => {

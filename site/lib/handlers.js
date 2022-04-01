@@ -49,14 +49,22 @@ exports.vacation = (req, res) => {
 
 exports.listVacations = async (req, res) => {
   const vacations = await db.getVacations({ available: true })
+  const currency = req.session.currency || 'USD'
   const context = {
+    currency,
     vacations: vacations.map(vacation => ({
       sku: vacation.sku,
       name: vacation.name,
       description: vacation.description,
-      price: '$' + vacation.price.toFixed(2),
+      price: convertFromUSD(vacation.price, currency),
       inSeason: vacation.inSeason,
+      qty: vacation.qty
     }))
+  }
+  switch(currency) {
+    case 'USD': context.currencyUSD = 'selected';break;
+    case 'GBP': context.currencyGBP = 'selected';break;
+    case 'BTC': context.currencyBTC = 'selected';break;
   }
   res.render('vacations', context)
 }
@@ -69,6 +77,20 @@ exports.notifyWhenInSeasonProcess = async (req, res) => {
   return res.redirect(303, '/vacations')
 }
 
+exports.setCurrency = (req, res) => {
+  req.session.currency = req.params.currency
+  return res.redirect(303, '/vacations')
+}
+
+function convertFromUSD(value, currency) {
+  switch(currency) {
+    case 'USD': return value * 1
+    case 'GBP': return value * 0.79
+    case 'BTC': return value * 0.000078
+    default: return NaN
+  }
+}
+
 const dataDir = pathUtils.resolve(__dirname, '..', 'data')
 const vacationPhotosDir = pathUtils.join(dataDir, 'vacation-photos')
 if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir)
@@ -79,6 +101,7 @@ function saveContestEntry(contestName, email, year, month, photoPath) {
 }
 
 const { promisify } = require('util')
+const Vacation = require('../models/vacation')
 const mkdir = promisify(fs.mkdir)
 const rename = promisify(fs.rename)
 
