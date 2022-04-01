@@ -14,6 +14,7 @@ const emailService = require('./lib/email')(credentials)
 const morgan = require('morgan')
 const fs = require('fs')
 const cluster = require('cluster')
+const db = require('./db')
 
 const app = express()
 
@@ -157,6 +158,10 @@ app.post('/cart/checkout', (req, res, next) => {
   })
 })
 
+app.get('/vacations', handlers.listVacations)
+
+app.get('/notify-me-when-in-season', handlers.notifyWhenInSeasonForm)
+app.post('/notify-me-when-in-season', handlers.notifyWhenInSeasonProcess)
 
 
 // 定制404页

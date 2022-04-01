@@ -1,5 +1,6 @@
 const pathUtils = require('path')
 const fs = require('fs')
+const db = require('./../db')
 
 exports.newsletterSignup = (req, res) => {
   res.render('newsletter-signup', { csrf: 'csrf token goes here'})
@@ -44,6 +45,28 @@ exports.vacation = (req, res) => {
     year: '2022',
     month: '3'
   })
+}
+
+exports.listVacations = async (req, res) => {
+  const vacations = await db.getVacations({ available: true })
+  const context = {
+    vacations: vacations.map(vacation => ({
+      sku: vacation.sku,
+      name: vacation.name,
+      description: vacation.description,
+      price: '$' + vacation.price.toFixed(2),
+      inSeason: vacation.inSeason,
+    }))
+  }
+  res.render('vacations', context)
+}
+
+exports.notifyWhenInSeasonForm = (req, res) => res.render('notify-me-when-in-season', { sku: req.query.sku })
+
+exports.notifyWhenInSeasonProcess = async (req, res) => {
+  const { email, sku, } = req.body
+  await db.addVacationInSeasonListener(email, sku)
+  return res.redirect(303, '/vacations')
 }
 
 const dataDir = pathUtils.resolve(__dirname, '..', 'data')
