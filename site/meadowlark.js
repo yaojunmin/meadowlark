@@ -17,6 +17,7 @@ const morgan = require('morgan')
 const fs = require('fs')
 const cluster = require('cluster')
 const db = require('./db')//创建数据库链接
+const addRoutes = require('./routes')
 
 const app = express()
 
@@ -74,110 +75,29 @@ app.use((req, res, next) => {
   next()
 })
 
-app.get('/', (req, res) => {
-  console.log('monster', req.cookies.monster)
-  console.log('signedMonster', req.signedCookies.signed_monster)
-  res.cookie('monster', 'nom nom', {
-    httpOnly: true
+// 定义路由
+addRoutes(app)
+
+// 自动化渲染视图
+const autoViews = {}
+const { promisify } = require('util')
+const fileExists = promisify(fs.exists)
+
+app.use(async (req, res, next) => {
+  const path = req.path.toLowerCase()
+  if (autoViews[path]) return res.render(autoViews[path], (err, html) => {
+    if (err) {
+      delete autoViews[path]
+      res.redirect('/404')
+    }
+    res.send(html)
   })
-  res.cookie('signed_monster', 'nom nom', { signed: true })
-  res.render('home')
-})
-
-// 测试异常
-app.get('/fail', (req, res) => {
-  throw new Error('nope')
-})
-
-app.get('/about', (req, res) => {
-  res.render('about', {fortune: fortune.getFortune()})
-})
-
-app.get('/header', (req, res) => {
-  res.type('text/plain')
-  const header = Object.entries(req.headers).map(([key, value]) => `${key}: ${value}`)
-  res.send(header.join('\n'))
-})
-
-/**表单 浏览器 */
-app.get('/newsletter-signup', handlers.newsletterSignup)
-app.post('/newsletter-signup/process', handlers.newsletterSignupProcess)
-app.get('/newsletter-signup/thank-you', handlers.newsletterSignupThankYou)
-/**表单 fetch */
-app.get('/newsletter', handlers.newsletter)
-app.post('/api/newsletter-signup', handlers.api.newsletterSignup)
-
-/**文件上传 浏览器*/
-app.get('/contest/vacation-photo', handlers.vacationPhotoContest)
-app.post('/contest/vacation-photo/:year/:month', (req, res) => {
-  const form = new multiparty.Form()
-  form.parse(req, (err, fields, files) => {
-    if (err) return res.status(500).send({ error: err.message })
-    handlers.vacationPhotoContestProcess(req, res, fields, files)
-  })
-})
-app.get('/contest/vacation-photo-thank-you', handlers.vacationPhotoContestThankYou)
-/**文件上传 fetch*/
-app.get('/contest/vacation', handlers.vacation)
-// app.post('/api/vacation-photo-contest/:year/:month', (req, res) => {
-//   const form = new multiparty.Form()
-//   form.parse(req, (err, fields, files) => {
-//     if (err) return res.status(500).send({ error: err.message })
-//     handlers.api.vacationPhotoContest(req, res, fields, files)
-//   })
-// })
-app.post('/api/vacation-photo-contest/:year/:month', upload.single('photo'), (req, res) => {
-  const fields = req.body
-  const files = req.file
-  handlers.api.vacationPhotoContest(req, res, fields, files)
-})
-
-// 邮件
-app.post('/cart/checkout', (req, res, next) => {
-  // const cart = req.session.cart
-  // if(!cart) next(new Error('cart does not exist.'))
-  // const name = req.body.name || '',
-  //       email = req.body.email || ''
-  // if (!email.match(VALID_EMAIL_REGEX)) return res.next(new Error('invalid email address.'))
-  // cart.number = Math.random().toString().replace(/^0\.0*/, '')
-  // cart.billing = {
-  //   name,
-  //   email,
-  // }
-  // render 使用回调 即不会发送到浏览器
-  const cart = {
-    number: 9999,
-    billing: {
-      name: req.body.name,
-      email: req.body.email,
-    },
+  if (await fileExists(__dirname + '/views/' + path + '.handlebars')) {
+    autoViews[path] = path.replace(/^\//, '')
+    return res.render(autoViews[path])
   }
-  res.render('email/cart-thank-you', { layout: null, cart }, (err, html) => {
-    console.log('rendered email:', html)
-    if(err) console.log('error in email template')
-    emailService.send(
-      // cart.billing.email,
-      req.body.email,
-      '我是主题',
-      html,
-      __dirname + '/public/img/email/email.png'
-    )
-    .then(info => {
-      console.log('send!', info)
-      res.render('cart-thank-you', { cart })
-    })
-    .catch(err => {
-      console.error('unable to send confirmation: ' + err.message)
-    })
-  })
+  next()
 })
-
-app.get('/vacations', handlers.listVacations)
-
-app.get('/notify-me-when-in-season', handlers.notifyWhenInSeasonForm)
-app.post('/notify-me-when-in-season', handlers.notifyWhenInSeasonProcess)
-
-app.get('/set-currency/:currency', handlers.setCurrency)
 
 // 定制404页
 app.use((req, res) => {
