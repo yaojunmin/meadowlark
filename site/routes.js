@@ -101,4 +101,9 @@ module.exports = app => {
   app.post('/notify-me-when-in-season', handlers.notifyWhenInSeasonProcess)
   
   app.get('/set-currency/:currency', handlers.setCurrency)
+
+  app.get('/api/vacations', handlers.api.getVacationsApi)
+  app.get('/api/vacation/:sku', handlers.api.getVacationBySkuApi)
+  app.post('/api/vacation/:sku/notify-when-in-season', handlers.api.addVacationInSeasonListenerApi)
+  app.delete('/api/vacation/:sku', handlers.api.requestDeleteVacationApi)
 }

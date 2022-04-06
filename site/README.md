@@ -80,3 +80,12 @@ express的官方文档也包含一个中间件列表
 
 ### 组织
 1. 自动化路由处理函数（静态或固定）
+
+## rest api
+### 规划
+### JOSN:API标准
+### 跨域资源共享
+1. cors npm包
+### 自动化测试
+1. postman
+2. node-fetch:等价浏览器上的fetch api

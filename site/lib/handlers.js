@@ -127,4 +127,21 @@ exports.api = {
   //   console.log('files:', files)
   //   res.send({result: 'sucess'})
   // }
+  getVacationsApi: async (req, res) => {
+    const vacations = await db.getVacations({ available: true })
+    res.json(vacations)
+  },
+  getVacationBySkuApi: async (req, res) => {
+    const vacation = await db.getVacationBySku(req.params.sku)
+    res.json(vacation)
+  },
+  addVacationInSeasonListenerApi: async (req, res) => {
+    await db.addVacationInSeasonListener(req.params.sku, req.body.email)
+    res.json({ message: 'success' })
+  },
+  requestDeleteVacationApi: async (req, res) => {
+    const { email, notes } = req.body
+    // await db.requestDeleteVacation(email, notes)
+    res.status(500).json({ message: 'not yet implemented ' })
+  },
 }
