@@ -66,7 +66,7 @@ Vacation.find((err, vacations) => {
 
 module.exports = {
   getVacations: async (options = {}) => Vacation.find(options),
-  addVacationInSeasonListener: async (email, sku) => {
+  addVacationInSeasonListener: async (sku, email) => {
     await VacationInSeasonListener.updateOne(
       { email },
       { $push: { skus: sku }},// 追加
