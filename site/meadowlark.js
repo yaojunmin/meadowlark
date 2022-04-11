@@ -40,7 +40,8 @@ switch(app.get('env')) {
     break;
 }
 
-app.use(express.static(__dirname + '/public'))
+// 区别静态资源
+app.use('/static', express.static(__dirname + '/public'))
 
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }))
