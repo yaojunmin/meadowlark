@@ -100,3 +100,11 @@ express的官方文档也包含一个中间件列表
 ### 缓存破坏
 1. 版本号：？version=2
 2. 散列：mian.323rsdfv34Srf34.css
+
+## 安全
+### https
+- X-Forwarded-Proto: 确定客户端与负载均衡服务器之间所使用的协议http、https
+### 跨站请求伪造（csrf）
+1. 限制其他网站到API的访问，参考connect-rest
+2. 避免csurf，在他之前链入中间件
+### 认证与授权

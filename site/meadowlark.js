@@ -18,6 +18,7 @@ const fs = require('fs')
 const cluster = require('cluster')
 const db = require('./db')//创建数据库链接
 const addRoutes = require('./routes')
+const csrf = require('csurf')
 
 const app = express()
 
@@ -67,6 +68,14 @@ app.use(expressSession({
   })
 }))
 app.use(flashMiddleware)
+
+// 令牌
+app.use(csrf({ cookie: true }))
+app.use((req, res, next) => {
+  // 不传or传错 异常500
+  res.locals._csrfToken = req.csrfToken()
+  next()
+})
 
 // 不同worker处理不同请求日志
 app.use((req, res, next) => {
