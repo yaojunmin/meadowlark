@@ -2,6 +2,7 @@ const mongoose = require('mongoose')
 const { credentials } = require('./config')
 const Vacation = require('./models/vacation')
 const VacationInSeasonListener = require('./models/vacationInSeasonListener')
+const User = require('./models/user')
 
 const { connectionString } = credentials.mongo
 if (!connectionString) {
@@ -72,5 +73,8 @@ module.exports = {
       { $push: { skus: sku }},// 追加
       { upsert: true }// update+insert
     )
-  }
+  },
+  getUserById: async id => User.findById(id),
+  getUserByAuthId: async authId => User.findOne({ authId }),
+  addUser: async data => new User(data).save(),
 }

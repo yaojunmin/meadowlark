@@ -28,6 +28,8 @@
     "multer": "^1.4.4",
     "multiparty": "^4.2.3",
     "nodemailer": "^6.7.3",
+    "passport": "^0.5.2",
+    "passport-facebook": "^3.0.0",
     "redis": "^4.0.6",
     "vhost": "^3.0.2"
   },
