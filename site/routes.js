@@ -9,6 +9,39 @@ const emailService = require('./lib/email')(credentials)
 module.exports = app => {
   app.get('/', main.home)
   
+  // 针对特定角色 中间件处理
+  const customerOnly = (req, res, next) => {
+    if (req.user && req.user.role === 'customer') return next()
+    res.redirect(303, '/unauthorized')
+  }
+  const employeeOnly = (req, res, next) => {
+    if (req.user && req.user.role === 'employee') return next()
+    // 表示跳过该路由
+    next('route')
+  }
+  app.get('/account', customerOnly, (req, res) => {
+    if (!req.user) return res.redirect(303, '/unauthorized')
+    res.render('account', { username: req.user.name })
+  })
+  app.get('/account/order-history', customerOnly, (req, res) => {
+    res.render('account/order-history')
+  })
+  app.get('/account/email-prefs', customerOnly, (req, res) => {
+    res.render('account/emial-prefs')
+  })
+  app.get('/sales', employeeOnly, (req, res) => {
+    res.render('sales')
+  })
+  // 未授权页
+  app.get('/unauthorized', (req, res) => {
+    res.status(403).render('unauthorized')
+  })
+  // 退出登录
+  app.get('/logout', (req, res) => {
+    req.logout()
+    res.redirect('/')
+  })
+
   // 测试异常
   app.get('/fail', (req, res) => {
     throw new Error('nope')

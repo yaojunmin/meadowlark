@@ -19,6 +19,7 @@ const cluster = require('cluster')
 const db = require('./db')//创建数据库链接
 const addRoutes = require('./routes')
 const csrf = require('csurf')
+const createAuth = require('./lib/auth')
 
 const app = express()
 
@@ -40,6 +41,18 @@ switch(app.get('env')) {
     app.use(morgan('combined', { stream }))
     break;
 }
+
+// 应用配置
+const auth = createAuth(app, {
+  baseUrl: process.env.BASE_URL,
+  providers: credentials.authProviders,
+  successRedirect: '/account',
+  failureRedirect: '/unauthorized',
+})
+// auth.init() 引入passort中间件
+auth.init()
+// 指定认证路由
+auth.registerRoutes()
 
 // 区别静态资源
 app.use('/static', express.static(__dirname + '/public'))
