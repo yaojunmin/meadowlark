@@ -112,3 +112,9 @@ express的官方文档也包含一个中间件列表
 ![截图](./renzheng.png)
 2. [x] oauth2 了解一下
 3. [x] 微信认证 尝试一下
+
+## 集成第三方API
+### 社交媒体
+良好的推广途径。Facebook、Twitter、Instagram、YouTube
+1. twitter 推文接入
+### 地理定位 

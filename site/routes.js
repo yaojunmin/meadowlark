@@ -4,6 +4,36 @@ const multer = require('multer') // 建议采用
 const upload = multer({dest: 'uploads/'})
 const { credentials } = require('./config')
 const emailService = require('./lib/email')(credentials)
+// 集成第三方API
+const twitterClient = require('./lib/twitter')({
+  consumerApiKey: credentials.twitter.consumerApiKey,
+  apiSecretKey: credentials.twitter.apiSecretKey,
+})
+// 搜索主题标签、合理时间缓存
+const getTopTweets = ((twitterClient, search) => {
+  const topTweets = {
+    count: 10,
+    lastRefreshed: 0,
+    refreshInterval: 15 * 60 * 1000,
+    tweets: [],
+  }
+  return async () => {
+    if (Date.now() > topTweets.lastRefreshed + topTweets.refreshInterval) {
+      const tweets = 
+        await twitterClient.search(search, topTweets.count)
+      const formattedTweets = await Promise.all(
+        tweets.statuses.map(async ({id_str, user}) => {
+          const url = `https://exl.ptpress.cn:8442/ex/l/6ee39484/${user.id_str}/statuses/${id_str}`
+          const embeddedTweet = await twitterClient.embed(url, {omit_script: 1})
+          return embeddedTweet.html
+        })
+      )
+      topTweets.lastRefreshed = Date.now()
+      topTweets.tweets = formattedTweets
+    }
+    return topTweets.tweets
+  }
+})(twitterClient, '#Oregon #travel')
 
 
 module.exports = app => {
@@ -40,6 +70,11 @@ module.exports = app => {
   app.get('/logout', (req, res) => {
     req.logout()
     res.redirect('/')
+  })
+
+  //第三方推文
+  app.get('/socail', async (req, res) => {
+    res.render('social', { tweets: await getTopTweets()  })
   })
 
   // 测试异常
