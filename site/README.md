@@ -114,6 +114,7 @@ express的官方文档也包含一个中间件列表
 3. [x] 微信认证 尝试一下
 
 ## 集成第三方API
+切换为国内常用的厂商
 ### 社交媒体
 良好的推广途径。Facebook、Twitter、Instagram、YouTube
 1. twitter 推文接入

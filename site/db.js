@@ -77,4 +77,6 @@ module.exports = {
   getUserById: async id => User.findById(id),
   getUserByAuthId: async authId => User.findOne({ authId }),
   addUser: async data => new User(data).save(),
+  updateVacationBySku: async (sku, data) => Vacation.updateOne({ sku }, data),
+  close: () => mongoose.connection.close(),
 }
