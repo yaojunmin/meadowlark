@@ -119,3 +119,5 @@ express的官方文档也包含一个中间件列表
 良好的推广途径。Facebook、Twitter、Instagram、YouTube
 1. twitter 推文接入
 ### 地理定位 
+1. 谷歌地图
+2. 天气服务
